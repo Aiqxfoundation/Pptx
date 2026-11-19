@@ -140,7 +140,10 @@ export function App() {
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
-    URL.revokeObjectURL(url);
+    // Revoking in the same tick cancels the download in Chrome/Firefox once the
+    // file is large (the MP4 render is tens of MB). Keep the blob URL alive so
+    // the browser can finish reading it, then clean it up.
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
   };
 
   const handleDownloadDeck = async (format: 'ppsx' | 'pptx') => {
@@ -197,7 +200,7 @@ export function App() {
       setRenderedVideo(result);
       triggerBlobDownload(result.blob, result.filename);
       setExportMessage(
-        `Rendered ${videoRes} MP4 video (${(result.blob.size / (1024 * 1024)).toFixed(1)} MB) — ready to send directly on WhatsApp.`
+        `Rendered ${videoRes} MP4 video (${(result.blob.size / (1024 * 1024)).toFixed(1)} MB) — ready for WhatsApp. If the download did not start, tap Download .MP4.`
       );
     } catch (err) {
       setExportMessage(err instanceof Error ? err.message : 'Video rendering failed.');
@@ -654,10 +657,23 @@ export function App() {
                         {videoProgress.active
                           ? 'Cancel Video Render'
                           : renderedVideo
-                            ? 'Re-Render & Download .MP4'
+                            ? 'Re-Render .MP4 Video'
                             : 'Render & Download .MP4 Video'}
                       </span>
                     </button>
+
+                    {renderedVideo && !videoProgress.active && (
+                      <button
+                        type="button"
+                        onClick={() => triggerBlobDownload(renderedVideo.blob, renderedVideo.filename)}
+                        className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-slate-900 bg-white border border-cyan-600 rounded-lg hover:bg-cyan-50 transition-colors cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5 text-cyan-700" />
+                        <span>
+                          Download .MP4 ({(renderedVideo.blob.size / (1024 * 1024)).toFixed(1)} MB)
+                        </span>
+                      </button>
+                    )}
 
                     <button
                       type="button"
