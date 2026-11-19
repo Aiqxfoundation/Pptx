@@ -69,13 +69,14 @@ export function App() {
 
   const nextSlide = useCallback(() => {
     setElapsedMs(0);
-    setCurrentIndex((prev) => {
-      if (prev + 1 < SLIDES.length) return prev + 1;
-      if (loopShow) return 0;
+    if (currentIndex + 1 < SLIDES.length) {
+      setCurrentIndex(currentIndex + 1);
+    } else if (loopShow) {
+      setCurrentIndex(0);
+    } else {
       setIsPlaying(false);
-      return prev;
-    });
-  }, [loopShow]);
+    }
+  }, [currentIndex, loopShow]);
 
   const prevSlide = useCallback(() => {
     setElapsedMs(0);
@@ -86,16 +87,16 @@ export function App() {
     if (!isPlaying) return;
     const tickMs = 50;
     const timer = window.setInterval(() => {
-      setElapsedMs((prev) => {
-        if (prev + tickMs >= slideDurationMs) {
-          nextSlide();
-          return 0;
-        }
-        return prev + tickMs;
-      });
+      setElapsedMs((prev) => Math.min(prev + tickMs, slideDurationMs));
     }, tickMs);
     return () => window.clearInterval(timer);
-  }, [isPlaying, slideDurationMs, nextSlide]);
+  }, [isPlaying, slideDurationMs]);
+
+  useEffect(() => {
+    if (isPlaying && elapsedMs >= slideDurationMs) {
+      nextSlide();
+    }
+  }, [isPlaying, elapsedMs, slideDurationMs, nextSlide]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
