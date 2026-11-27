@@ -130,7 +130,7 @@ export const SlideCanvas: React.FC<SlideCanvasProps> = ({ slide }) => {
   // Title Slide (Slide 1)
   if (slide.layout === 'title') {
     return (
-      <div className="w-full aspect-[16/9] bg-[#0A1628] text-slate-50 relative overflow-hidden flex select-none">
+      <div className="w-full min-h-[420px] aspect-[16/9] bg-[#0A1628] text-slate-50 relative overflow-y-auto overflow-x-hidden flex select-none sm:min-h-0 sm:overflow-hidden">
         <div className="w-1.5 bg-amber-500 shrink-0" />
         <div className="flex-1 px-12 py-10 flex flex-col justify-between">
           <div>
@@ -207,7 +207,7 @@ export const SlideCanvas: React.FC<SlideCanvasProps> = ({ slide }) => {
 
   // Standard Academic Content Slides (2–22)
   return (
-    <div className="w-full aspect-[16/9] bg-[#F8FAFC] text-slate-900 relative overflow-hidden flex flex-col select-none">
+    <div className="w-full min-h-[420px] aspect-[16/9] bg-[#F8FAFC] text-slate-900 relative overflow-y-auto overflow-x-hidden flex flex-col select-none sm:min-h-0 sm:overflow-hidden">
       {/* Top thin navy bar */}
       <div className="h-1 w-full bg-[#0A1628] shrink-0" />
 
@@ -689,7 +689,7 @@ export const SlideCanvas: React.FC<SlideCanvasProps> = ({ slide }) => {
       </div>
 
       {/* Footer */}
-      <div className="px-8 py-2 shrink-0 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+      <div className="hidden px-8 py-2 shrink-0 border-t border-slate-200 items-center justify-between text-[10px] text-slate-500 sm:flex">
         <span>MPhil Physical Chemistry · Energetics of Photochemical Reactions</span>
         <span className="font-mono-tech font-semibold">{String(slide.id).padStart(2, '0')} / 22</span>
       </div>
