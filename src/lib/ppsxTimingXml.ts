@@ -14,8 +14,7 @@ interface TargetShape {
   animStyle: 'fade' | 'rise' | 'wipe' | 'zoom';
 }
 
-function buildTransitionXml(transition: TransitionKind, durationMs: number): string {
-  const safeDuration = Math.max(2500, Math.round(durationMs));
+function buildTransitionXml(transition: TransitionKind): string {
   let inner = '<p:fade thruBlk="0"/>';
   switch (transition) {
     case 'fade':
@@ -34,7 +33,7 @@ function buildTransitionXml(transition: TransitionKind, durationMs: number): str
       inner = '<p:split orient="horz" dir="out"/>';
       break;
   }
-  return `<p:transition spd="med" advClick="1" advTm="${safeDuration}">${inner}</p:transition>`;
+  return `<p:transition spd="med" advClick="1">${inner}</p:transition>`;
 }
 
 function extractAnimatableShapes(slideXml: string): TargetShape[] {
@@ -142,7 +141,7 @@ export async function convertPptxBufferToAnimatedPpsx(
   const presPropsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentationPr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:showPr loop="${loopAttr}" showNarration="0" showAnimation="1" useTimings="1"><p:present/><p:sldAll/></p:showPr></p:presentationPr>`;
   zip.file('ppt/presProps.xml', presPropsXml);
 
-  // 3. Inject <p:transition> (with advTm) and <p:timing> (auto-triggered entrance animations) per slide
+    // 3. Inject click-driven slide transitions and entrance animations for each slide
   for (const cfg of configs) {
     const slidePath = `ppt/slides/slide${cfg.slideNumber}.xml`;
     const slideFile = zip.file(slidePath);
@@ -154,7 +153,7 @@ export async function convertPptxBufferToAnimatedPpsx(
     slideXml = slideXml.replace(/<p:timing[\s\S]*?<\/p:timing>/g, '');
 
     const shapes = extractAnimatableShapes(slideXml);
-    const transitionXml = buildTransitionXml(cfg.transition, cfg.durationMs);
+    const transitionXml = buildTransitionXml(cfg.transition);
     const timingXml = buildTimingXml(shapes, cfg.durationMs);
 
     slideXml = slideXml.replace('</p:sld>', `${transitionXml}${timingXml}</p:sld>`);
