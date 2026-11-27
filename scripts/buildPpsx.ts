@@ -25,8 +25,8 @@ async function main() {
   for (let i = 1; i <= 22; i++) {
     const slideXml = await zip.file(`ppt/slides/slide${i}.xml`)?.async('string');
     if (!slideXml) throw new Error(`Missing slide${i}.xml`);
-    if (!slideXml.includes('<p:transition ') || !slideXml.includes('advTm="')) {
-      throw new Error(`Slide ${i} missing auto-advance transition advTm`);
+    if (!slideXml.includes('<p:transition ') || !slideXml.includes('advClick="1"') || slideXml.includes('advTm="')) {
+      throw new Error(`Slide ${i} must advance on click and must not use timed auto-advance`);
     }
     if (!slideXml.includes('<p:timing>') || !slideXml.includes('nodeType="withEffect"')) {
       throw new Error(`Slide ${i} missing auto-triggered p:timing animations`);
@@ -42,7 +42,7 @@ async function main() {
   }
 
   console.log(`Generated & verified ${outPath} (${(bytes.byteLength / 1024).toFixed(1)} KB)`);
-  console.log(`All 22 slides verified: slideshow.main+xml, showPr useTimings="1", advTm transitions, ${totalAnimations} staggered animations.`);
+  console.log(`All 22 slides verified: slideshow.main+xml, showPr useTimings="1", click-driven transitions, ${totalAnimations} staggered animations.`);
 }
 
 main().catch((err) => {
